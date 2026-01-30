@@ -52,7 +52,7 @@ const DataTable = () => {
     const [globalFilter, setGlobalFilter] = React.useState("")
 
     const table = useReactTable({
-        data,
+        data: [],
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
