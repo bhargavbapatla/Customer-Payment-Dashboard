@@ -153,7 +153,7 @@ const DataTable = () => {
                 {/* <div className="rounded-none border-0 pb-4"> */}
                 <div className="-mx-6">
                     <table className="w-full caption-bottom text-sm">
-                        <TableHeader className="sticky top-[89px] z-30 bg-white/80 backdrop-blur-md shadow-sm">
+                        <TableHeader className="sticky top-[89px] z-30 bg-white/40 backdrop-blur-md shadow-sm">
                             {table.getHeaderGroups().map((headerGroup) => (
                                 <TableRow key={headerGroup.id} className="border-b border-gray-100 hover:bg-transparent">
                                     {headerGroup.headers.map((header) => {
