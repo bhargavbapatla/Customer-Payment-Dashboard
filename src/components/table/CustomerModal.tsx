@@ -19,17 +19,24 @@ import {
     SelectValue,
 } from "../ui/select"
 import { customerInitialValues, fieldMeta, validationSchema } from "./helper"
-import type { IFieldMeta } from "@/types/customer"
+import type { IFieldMeta, Customer } from "@/types/customer"
+import { useCreateCustomer, useUpdateCustomer } from "@/hooks/useCustomers"
 
 
 export function CustomerModal() {
     const { isModalOpen, closeModal, editingCustomer } = useStore()
+    const { mutateAsync: createCustomer } = useCreateCustomer()
+    const { mutateAsync: updateCustomer } = useUpdateCustomer()
 
     const formik = useFormik({
         initialValues: customerInitialValues,
         validationSchema,
-        onSubmit: (values) => {
-            console.log(editingCustomer ? "Updating customer:" : "Adding customer:", values)
+        onSubmit: async (values) => {
+            if (editingCustomer) {
+                await updateCustomer({ ...values, id: editingCustomer.id } as Customer)
+            } else {
+                await createCustomer(values as unknown as Omit<Customer, "id">)
+            }
             closeModal()
         },
     })

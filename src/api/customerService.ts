@@ -2,9 +2,7 @@ import type { Customer } from "@/types/customer";
 
 
 // Mock Data
-let customers: Customer[] = [
-  { id: "1", name: "John Doe", description: "Web Dev", status: "Paid", rate: 85.0, balance: 0.0, deposit: 500.0 }
-];
+let customers: Customer[] = [];
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -16,7 +14,11 @@ export const customerService = {
 
   add: async (customer: Omit<Customer, "id">): Promise<Customer> => {
     await delay(500);
-    const newCustomer = { ...customer, id: Math.random().toString(36).substr(2, 9) };
+    // Generate ID: Find max ID and increment by 1, start from 1 if empty
+    const maxId = customers.reduce((max, c) => Math.max(max, parseInt(c.id) || 0), 0);
+    const newId = (maxId + 1).toString();
+    
+    const newCustomer = { ...customer, id: newId };
     customers.push(newCustomer);
     return newCustomer;
   },

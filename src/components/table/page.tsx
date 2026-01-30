@@ -11,6 +11,7 @@ import {
     ChevronLeft,
     ChevronRight,
     Filter,
+    Inbox,
     Plus,
     Search,
     Trash
@@ -37,7 +38,8 @@ import {
 import { useStore } from "@/store/useUIStore"
 import { CustomerModal } from "./CustomerModal"
 import { columns } from "./columns"
-import data from "./data"
+// import data from "./data"
+import { useCustomers } from "@/hooks/useCustomers"
 
 
 
@@ -57,8 +59,11 @@ const DataTable = () => {
         openEditModal
     } = useStore()
 
+    const { data: customers } = useCustomers()
+
+
     const table = useReactTable({
-        data,
+        data: customers || [],
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -89,9 +94,9 @@ const DataTable = () => {
                                 <span className="text-sm font-medium text-gray-600">
                                     {table.getFilteredSelectedRowModel().rows.length} selected
                                 </span>
-                                <Button 
-                                    variant="outline" 
-                                    size="icon" 
+                                <Button
+                                    variant="outline"
+                                    size="icon"
                                     className="h-10 w-10 border-gray-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-200 shadow-sm transition-colors"
                                 >
                                     <Trash className="h-4 w-4" />
@@ -149,7 +154,7 @@ const DataTable = () => {
                     </div>
 
                     {/* Add Customer Button */}
-                    <Button 
+                    <Button
                         className="bg-blue-600 hover:bg-blue-700 text-white font-medium h-10 px-4 w-full md:w-auto"
                         onClick={() => {
                             if (table.getFilteredSelectedRowModel().rows.length === 1) {
@@ -221,9 +226,19 @@ const DataTable = () => {
                                 <TableRow>
                                     <TableCell
                                         colSpan={columns.length}
-                                        className="h-24 text-center"
+                                        className="h-50 text-center"
                                     >
-                                        No results.
+                                        <div className="flex flex-col items-center justify-center space-y-3">
+                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
+                                                <Inbox className="h-6 w-6 text-gray-400" />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <p className="text-sm font-medium text-gray-900">No Data Found</p>
+                                                <p className="text-sm text-gray-500">
+                                                    Add a new customer to get started.
+                                                </p>
+                                            </div>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -285,7 +300,7 @@ const DataTable = () => {
                             >
                                 <ChevronLeft className="h-4 w-4 text-gray-500" />
                             </Button>
-                            
+
                             <span className="text-sm text-gray-600 font-medium min-w-[3rem] text-center">
                                 {table.getState().pagination.pageIndex + 1}/{table.getPageCount()}
                             </span>

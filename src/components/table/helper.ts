@@ -22,6 +22,7 @@ export const validationSchema =  Yup.object({
 
 export const customerInitialValues = {
     name: "",
+    phone: "",
     description: "",
     status: "",
     rate: "",

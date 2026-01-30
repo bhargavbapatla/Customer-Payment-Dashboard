@@ -2,8 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { customerService } from "@/api/customerService";
 import type { Customer } from "@/types/customer";
 import { customerKeys } from "@/lib/queryKeys";
-
-// import { toast } from "sonner"; // Assuming you use Sonner or Shadcn toast
+import { toast } from "sonner";
 
 export const useCustomers = () => {
   return useQuery({
@@ -20,7 +19,19 @@ export const useCreateCustomer = () => {
     onSuccess: () => {
       // 1. Invalidate cache to trigger a re-fetch
       queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
-    //   toast.success("Customer added successfully");
+      toast.success("Customer added successfully");
+    },
+  });
+};
+
+export const useUpdateCustomer = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: customerService.update,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
+      toast.success("Customer updated successfully");
     },
   });
 };

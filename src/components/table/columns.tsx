@@ -94,7 +94,7 @@ export const columns: ColumnDef<Customer>[] = [
         cell: ({ row }) => (
             <div className="flex flex-col">
                 <span className="font-semibold text-gray-900">{row.original.name}</span>
-                <span className="text-xs text-gray-500">{row.original.phone}</span>
+                <span className="text-xs text-gray-500">{row.original.id}</span>
             </div>
         ),
     },
