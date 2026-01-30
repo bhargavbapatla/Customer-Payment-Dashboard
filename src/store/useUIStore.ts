@@ -12,6 +12,7 @@ import type { Customer } from '@/types/customer';
 interface AppState {
   // === UI Slice ===
   isModalOpen: boolean;
+  isViewMode: boolean; // Add this
   editingCustomer: Customer | null;
   
   // === Table Slice ===
@@ -25,6 +26,7 @@ interface AppState {
   // UI Actions
   openAddModal: () => void;
   openEditModal: (customer: Customer) => void;
+  openViewModal: (customer: Customer) => void; // Add this
   closeModal: () => void;
   
   // Table Actions
@@ -51,6 +53,7 @@ const functionalUpdate = <T>(updater: Updater<T>, old: T): T => {
 export const useStore = create<AppState>((set, get) => ({
   // --- Initial State ---
   isModalOpen: false,
+  isViewMode: false, // Initialize
   editingCustomer: null,
   sorting: [],
   columnFilters: [],
@@ -59,9 +62,10 @@ export const useStore = create<AppState>((set, get) => ({
   globalFilter: "",
 
   // --- UI Actions ---
-  openAddModal: () => set({ isModalOpen: true, editingCustomer: null }),
-  openEditModal: (customer) => set({ isModalOpen: true, editingCustomer: customer }),
-  closeModal: () => set({ isModalOpen: false, editingCustomer: null }),
+  openAddModal: () => set({ isModalOpen: true, editingCustomer: null, isViewMode: false }),
+  openEditModal: (customer) => set({ isModalOpen: true, editingCustomer: customer, isViewMode: false }),
+  openViewModal: (customer) => set({ isModalOpen: true, editingCustomer: customer, isViewMode: true }), // Add this
+  closeModal: () => set({ isModalOpen: false, editingCustomer: null, isViewMode: false }),
 
   // --- Table Actions ---
   setSorting: (updater) => 

@@ -46,8 +46,8 @@ export const useDeleteCustomers = () => {
       await queryClient.cancelQueries({ queryKey: customerKeys.lists() });
       const previousCustomers = queryClient.getQueryData(customerKeys.lists());
 
-      queryClient.setQueryData(customerKeys.lists(), (old: Customer[]) => 
-        old.filter(customer => !deletedIds.includes(customer.id))
+      queryClient.setQueryData(customerKeys.lists(), (old: Customer[] | undefined) => 
+        old ? old.filter(customer => !deletedIds.includes(customer.id)) : []
       );
 
       return { previousCustomers };
@@ -57,6 +57,7 @@ export const useDeleteCustomers = () => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
+      toast.success("Customer(s) deleted successfully");
     },
   });
 };
