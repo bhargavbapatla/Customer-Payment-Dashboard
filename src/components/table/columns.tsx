@@ -10,6 +10,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
+import { useStore } from "@/store/useUIStore"
 
 const SortIcon = ({ className, sortState }: { className?: string; sortState?: false | "asc" | "desc" }) => (
     <svg width="10" height="10" viewBox="0 0 8 13" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
@@ -195,6 +196,8 @@ export const columns: ColumnDef<Customer>[] = [
     {
         id: "actions",
         cell: ({ row }) => {
+            const { openEditModal } = useStore()
+            
             return (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -211,7 +214,10 @@ export const columns: ColumnDef<Customer>[] = [
                             <span className="flex-1 font-medium">View</span>
                             <Info className="ml-2 h-4 w-4" />
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-blue-600 focus:text-blue-600 cursor-pointer">
+                        <DropdownMenuItem 
+                            className="text-blue-600 focus:text-blue-600 cursor-pointer"
+                            onClick={() => openEditModal(row.original)}
+                        >
                             <span className="flex-1 font-medium">Edit</span>
                             <Pencil className="ml-2 h-4 w-4" />
                         </DropdownMenuItem>

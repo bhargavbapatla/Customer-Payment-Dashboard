@@ -4,10 +4,7 @@ import {
     getFilteredRowModel,
     getPaginationRowModel,
     getSortedRowModel,
-    useReactTable,
-    type ColumnFiltersState,
-    type SortingState,
-    type VisibilityState
+    useReactTable
 } from "@tanstack/react-table"
 import {
     ChevronDown,
@@ -18,7 +15,6 @@ import {
     Search,
     Trash
 } from "lucide-react"
-import * as React from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -38,21 +34,31 @@ import {
 } from "@/components/ui/table"
 
 // --- Data Type Definition ---
+import { useStore } from "@/store/useUIStore"
+import { CustomerModal } from "./CustomerModal"
 import { columns } from "./columns"
 import data from "./data"
 
 
 
-// --- Main Table Component ---
 const DataTable = () => {
-    const [sorting, setSorting] = React.useState<SortingState>([])
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-    const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-    const [rowSelection, setRowSelection] = React.useState({})
-    const [globalFilter, setGlobalFilter] = React.useState("")
+    const {
+        sorting,
+        columnFilters,
+        columnVisibility,
+        rowSelection,
+        globalFilter,
+        setSorting,
+        setColumnFilters,
+        setColumnVisibility,
+        setRowSelection,
+        setGlobalFilter,
+        openAddModal,
+        openEditModal
+    } = useStore()
 
     const table = useReactTable({
-        data: [],
+        data,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -143,9 +149,24 @@ const DataTable = () => {
                     </div>
 
                     {/* Add Customer Button */}
-                    <Button className="bg-blue-600 hover:bg-blue-700 text-white font-medium h-10 px-4">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add customer
+                    <Button 
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-medium h-10 px-4 w-full md:w-auto"
+                        onClick={() => {
+                            if (table.getFilteredSelectedRowModel().rows.length === 1) {
+                                openEditModal(table.getFilteredSelectedRowModel().rows[0].original)
+                            } else {
+                                openAddModal()
+                            }
+                        }}
+                    >
+                        {table.getFilteredSelectedRowModel().rows.length === 1 ? (
+                            "Update customer"
+                        ) : (
+                            <>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add customer
+                            </>
+                        )}
                     </Button>
                 </div>
 
@@ -282,6 +303,7 @@ const DataTable = () => {
                     </div>
                 </div>
             </div>
+            <CustomerModal />
         </div>
     )
 }

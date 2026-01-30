@@ -9,3 +9,12 @@ export interface Customer {
   balance: number;
   deposit: number;
 }
+
+export interface IFieldMeta {
+    name: string;
+    label: string;
+    type: "textField" | "textAreaField" | "selectField" | "numberField";
+    isRequired: boolean;
+    placeholder?: string;
+    options?: string[];
+}
