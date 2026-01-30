@@ -52,8 +52,10 @@ export const useDeleteCustomers = () => {
 
       return { previousCustomers };
     },
-    onError: (err, newTodo, context) => {
-      queryClient.setQueryData(customerKeys.lists(), context?.previousCustomers);
+    onError: (_err, _variables, context) => {
+      if (context?.previousCustomers) {
+        queryClient.setQueryData(customerKeys.lists(), context.previousCustomers);
+      }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: customerKeys.lists() });

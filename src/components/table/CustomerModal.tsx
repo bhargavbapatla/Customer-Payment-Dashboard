@@ -1,3 +1,5 @@
+import { useCreateCustomer, useUpdateCustomer } from "@/hooks/useCustomers"
+import type { IFieldMeta, PaymentStatus } from "@/types/customer"
 import { Field, FormikProvider, useFormik, type FieldProps } from "formik"
 import { useEffect } from "react"
 import { useStore } from "../../store/useUIStore"
@@ -10,7 +12,6 @@ import {
     DialogTitle,
 } from "../ui/dialog"
 import { Input } from "../ui/input"
-import { Textarea } from "../ui/textarea"
 import {
     Select,
     SelectContent,
@@ -18,10 +19,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from "../ui/select"
-import { customerInitialValues, fieldMeta, validationSchema } from "./helper"
-import type { IFieldMeta, Customer } from "@/types/customer"
-import { useCreateCustomer, useUpdateCustomer } from "@/hooks/useCustomers"
 import { Spinner } from "../ui/spinner"
+import { Textarea } from "../ui/textarea"
+import { customerInitialValues, fieldMeta, validationSchema } from "./helper"
 
 export function CustomerModal() {
     const { isModalOpen, closeModal, editingCustomer, isViewMode } = useStore()
@@ -34,10 +34,18 @@ export function CustomerModal() {
         initialValues: customerInitialValues,
         validationSchema,
         onSubmit: async (values) => {
+            const customerData = {
+                ...values,
+                rate: Number(values.rate),
+                balance: Number(values.balance),
+                deposit: Number(values.deposit),
+                status: values.status as PaymentStatus,
+            }
+
             if (editingCustomer) {
-                await updateCustomer({ ...values, id: editingCustomer.id } as Customer)
+                await updateCustomer({ ...customerData, id: editingCustomer.id })
             } else {
-                await createCustomer(values as unknown as Omit<Customer, "id">)
+                await createCustomer(customerData)
             }
             closeModal()
         },
@@ -56,7 +64,7 @@ export function CustomerModal() {
     const renderTextAreaField = (fieldConfig: IFieldMeta) => (
         <div className="w-full">
             <Field name={fieldConfig.name}>
-                {({ field, form, meta }: FieldProps) => (
+                {({ meta }: FieldProps) => (
                     <>
                         {renderLabel(fieldConfig.name, fieldConfig.label)}
                         <Textarea
@@ -76,7 +84,7 @@ export function CustomerModal() {
     const renderTextField = (fieldConfig: IFieldMeta) => (
         <div className="w-full">
             <Field name={fieldConfig.name}>
-                {({ field, form, meta }: FieldProps) => (
+                {({ meta }: FieldProps) => (
                     <>
                         {renderLabel(fieldConfig.name, fieldConfig.label)}
                         <Input
@@ -126,7 +134,7 @@ export function CustomerModal() {
     const renderNumberField = (fieldConfig: IFieldMeta) => (
         <div className="w-full">
             <Field name={fieldConfig.name}>
-                {({ field, form, meta }: FieldProps) => (
+                {({ meta }: FieldProps) => (
                     <>
                         {renderLabel(fieldConfig.name, fieldConfig.label)}
                         <Input
@@ -156,7 +164,14 @@ export function CustomerModal() {
 
     useEffect(() => {
         if (editingCustomer) {
-            formik.setValues({ ...customerInitialValues, ...editingCustomer })
+            formik.setValues({
+                ...customerInitialValues,
+                ...editingCustomer,
+                rate: String(editingCustomer.rate),
+                balance: String(editingCustomer.balance),
+                deposit: String(editingCustomer.deposit),
+                status: editingCustomer.status,
+            })
         } else {
             formik.resetForm()
         }
@@ -164,9 +179,6 @@ export function CustomerModal() {
 
     return (
         <Dialog open={isModalOpen} onOpenChange={(open) => !open && closeModal()}>
-            {/* 1. max-h-[90vh]: prevents modal from being taller than screen
-                2. flex flex-col: allows us to separate Header, Body, Footer
-            */}
             <DialogContent className="sm:max-w-[500px] bg-white max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
                 <FormikProvider value={formik}>
                     

@@ -23,12 +23,14 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { Input } from "@/components/ui/input"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import {
     TableBody,
     TableCell,
@@ -36,14 +38,19 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table"
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 // --- Data Type Definition ---
 import { useStore } from "@/store/useUIStore"
 import { CustomerModal } from "./CustomerModal"
 import { columns } from "./columns"
 // import data from "./data"
-import { useCustomers, useDeleteCustomers } from "@/hooks/useCustomers"
 import { Spinner } from "@/components/ui/spinner"
+import { useCustomers, useDeleteCustomers } from "@/hooks/useCustomers"
 import { useState } from "react"
 import { DeleteConfirmationDialog } from "./DeleteConfirmationDialog"
 
@@ -268,45 +275,62 @@ const DataTable = () => {
                 </div>
 
                 {/* Pagination */}
-                <div className="flex items-center justify-end space-x-2 py-4">
+                <div className="flex items-center justify-between py-4">
                     <div className="flex-1 text-sm text-muted-foreground">
-                        Rows per page:
-                        <select
-                            value={table.getState().pagination.pageSize}
-                            onChange={e => {
-                                table.setPageSize(Number(e.target.value))
-                            }}
-                            className="mx-2 border rounded p-1"
-                        >
-                            {[10, 20, 30, 40, 50].map(pageSize => (
-                                <option key={pageSize} value={pageSize}>
-                                    {pageSize}
-                                </option>
-                            ))}
-                        </select>
+                        {table.getFilteredRowModel().rows.length > 0 ? (
+                            <>
+                                {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}-
+                                {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getFilteredRowModel().rows.length)} of{" "}
+                                {table.getFilteredRowModel().rows.length}
+                            </>
+                        ) : (
+                            "0 of 0"
+                        )}
                     </div>
-                    <div className="flex items-center space-x-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => table.previousPage()}
-                            disabled={!table.getCanPreviousPage()}
-                            className="cursor-pointer"
-                        >
-                            <ChevronLeft className="h-4 w-4" />
-                        </Button>
-                        <div className="text-sm font-medium">
-                            {table.getState().pagination.pageIndex + 1}/{table.getPageCount()}
+                    <div className="flex items-center space-x-6 lg:space-x-8">
+                        <div className="flex items-center space-x-2">
+                            <p className="text-xs font-medium text-[#687182]">Rows per page:</p>
+                            <Select
+                                value={`${table.getState().pagination.pageSize}`}
+                                onValueChange={(value) => {
+                                    table.setPageSize(Number(value))
+                                }}
+                            >
+                                <SelectTrigger className="h-8 w-[70px]">
+                                    <SelectValue placeholder={table.getState().pagination.pageSize} />
+                                </SelectTrigger>
+                                <SelectContent side="top">
+                                    {[5, 10, 20, 30, 40, 50].map((pageSize) => (
+                                        <SelectItem key={pageSize} value={`${pageSize}`}>
+                                            {pageSize}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => table.nextPage()}
-                            disabled={!table.getCanNextPage()}
-                            className="cursor-pointer"
-                        >
-                            <ChevronRight className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center space-x-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => table.previousPage()}
+                                disabled={!table.getCanPreviousPage()}
+                                className="cursor-pointer"
+                            >
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <div className="text-sm font-medium">
+                                {table.getState().pagination.pageIndex + 1}/{table.getPageCount()}
+                            </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => table.nextPage()}
+                                disabled={!table.getCanNextPage()}
+                                className="cursor-pointer"
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -91,6 +91,66 @@ const data: Customer[] = [
         balance: -350.00,
         deposit: 500.00
     },
+    {
+        id: "8",
+        name: "Kaiya Vetrovs",
+        phone: "5684236530",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla...",
+        status: "Open",
+        rate: 70.00,
+        balance: -350.00,
+        deposit: 500.00
+    },
+    {
+        id: "9",
+        name: "Kaiya Vetrovs",
+        phone: "5684236530",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla...",
+        status: "Open",
+        rate: 70.00,
+        balance: -350.00,
+        deposit: 500.00
+    },
+    {
+        id: "10",
+        name: "Kaiya Vetrovs",
+        phone: "5684236530",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla...",
+        status: "Open",
+        rate: 70.00,
+        balance: -350.00,
+        deposit: 500.00
+    },
+    {
+        id: "11",
+        name: "Kaiya Vetrovs",
+        phone: "5684236530",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla...",
+        status: "Open",
+        rate: 70.00,
+        balance: -350.00,
+        deposit: 500.00
+    },
+    {
+        id: "12",
+        name: "Kaiya Vetrovs",
+        phone: "5684236530",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla...",
+        status: "Open",
+        rate: 70.00,
+        balance: -350.00,
+        deposit: 500.00
+    },
+    {
+        id: "13",
+        name: "Kaiya Vetrovs",
+        phone: "5684236530",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla...",
+        status: "Open",
+        rate: 70.00,
+        balance: -350.00,
+        deposit: 500.00
+    },
 ]
 
 export default data
