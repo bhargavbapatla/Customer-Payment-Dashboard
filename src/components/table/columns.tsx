@@ -10,6 +10,83 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "../ui/tooltip"
+import { useStore } from "@/store/useUIStore"
+import { useDeleteCustomers } from "@/hooks/useCustomers"
+import { useState } from "react"
+import { DeleteConfirmationDialog } from "./DeleteConfirmationDialog"
+
+// --- Components ---
+const ActionsCell = ({ row }: { row: any }) => {
+    const { openEditModal, openViewModal } = useStore()
+    const { mutateAsync: deleteCustomer, isPending: isDeleting } = useDeleteCustomers()
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
+    const handleDelete = async () => {
+        await deleteCustomer([row.original.id])
+        setShowDeleteDialog(false)
+    }
+
+    return (
+        <>
+            <DropdownMenu>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <DropdownMenuTrigger asChild>
+                            <Button 
+                                variant="ghost" 
+                                className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100 transition-opacity"
+                            >
+                                <span className="sr-only">Open menu</span>
+                                <MoreVertical className="h-4 w-4 text-gray-500" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Actions</p>
+                    </TooltipContent>
+                </Tooltip>
+                <DropdownMenuContent align="end" className="w-[160px]">
+                    <DropdownMenuItem 
+                        className="text-[#4B85FA] focus:text-[#4B85FA] cursor-pointer"
+                        onClick={() => openViewModal(row.original)}
+                    >
+                        <span className="flex-1 font-medium">View</span>
+                        <Info className="ml-2 h-4 w-4 fill-[#4B85FA] text-white" />
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                        className="text-[#4B85FA] focus:text-[#4B85FA] cursor-pointer"
+                        onClick={() => openEditModal(row.original)}
+                    >
+                        <span className="flex-1 font-medium">Edit</span>
+                        <Pencil className="ml-2 h-4 w-4 fill-[#4B85FA] text-white" />
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                        className="text-red-600 focus:text-red-600 cursor-pointer"
+                        onSelect={() => {
+                            setShowDeleteDialog(true)
+                        }}
+                    >
+                        <span className="flex-1 font-medium">Delete</span>
+                        <Trash className="ml-2 h-4 w-4" />
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DeleteConfirmationDialog 
+                open={showDeleteDialog}
+                onOpenChange={setShowDeleteDialog}
+                onConfirm={handleDelete}
+                isDeleting={isDeleting}
+                description="Are you sure you wanna delete this item, it cannot be undone."
+            />
+        </>
+    )
+}
 
 const SortIcon = ({ className, sortState }: { className?: string; sortState?: false | "asc" | "desc" }) => (
     <svg width="10" height="10" viewBox="0 0 8 13" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
@@ -29,6 +106,16 @@ const handleSort = (column: any) => {
     }
 }
 
+// --- Helper for Currency ---
+const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "CAD",
+        currencyDisplay: "narrowSymbol",
+    }).format(amount)
+}
+
+// --- Columns Definition ---
 export const columns: ColumnDef<Customer>[] = [
     {
         id: "select",
@@ -62,73 +149,77 @@ export const columns: ColumnDef<Customer>[] = [
     },
     {
         accessorKey: "id",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => handleSort(column)}
-                    className="-ml-4 h-8 hover:bg-transparent"
-                >
-                    #
-                    <SortIcon className="ml-2" sortState={column.getIsSorted()} />
-                </Button>
-            )
-        },
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => handleSort(column)}
+                className="-ml-4 h-8 hover:bg-transparent"
+            >
+                #
+                <SortIcon className="ml-2" sortState={column.getIsSorted()} />
+            </Button>
+        ),
         cell: ({ row }) => <div className="font-medium">{row.index + 1}</div>,
     },
     {
         accessorKey: "name",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => handleSort(column)}
-                    className="-ml-4 h-8 hover:bg-transparent uppercase text-[11px] font-semibold text-[#464F60]"
-                >
-                    NAME
-                    <SortIcon className="ml-2" sortState={column.getIsSorted()} />
-                </Button>
-            )
-        },
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => handleSort(column)}
+                className="-ml-4 h-8 hover:bg-transparent uppercase text-[11px] font-semibold text-[#464F60]"
+            >
+                NAME
+                <SortIcon className="ml-2" sortState={column.getIsSorted()} />
+            </Button>
+        ),
         cell: ({ row }) => (
-            <div className="flex flex-col">
-                <span className="font-semibold text-gray-900">{row.original.name}</span>
-                <span className="text-xs text-gray-500">{row.original.phone}</span>
+            // UPDATE: Removed 'truncate', added 'whitespace-normal' and 'break-words'
+            <div className="flex flex-col max-w-[150px]">
+                <span className="font-semibold text-gray-900 whitespace-normal break-words">
+                    {row.original.name}
+                </span>
+                <span className="text-xs text-gray-500">{row.original.id}</span>
             </div>
         ),
     },
     {
         accessorKey: "description",
         header: () => <div className="uppercase text-[11px] font-semibold text-[#464F60]">DESCRIPTION</div>,
-        cell: ({ row }) => <div className="text-gray-600 max-w-[300px] truncate">{row.getValue("description")}</div>,
+        cell: ({ row }) => (
+            // UPDATE: Removed 'line-clamp', added 'whitespace-normal' and 'break-words'
+            <div 
+                className="text-gray-600 max-w-[250px] whitespace-normal break-words"
+            >
+                {row.getValue("description")}
+            </div>
+        ),
     },
     {
         accessorKey: "status",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => handleSort(column)}
-                    className="-ml-4 h-8 hover:bg-transparent uppercase text-[11px] font-semibold text-[#464F60]"
-                >
-                    STATUS
-                    <SortIcon className="ml-2" sortState={column.getIsSorted()} />
-                </Button>
-            )
-        },
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => handleSort(column)}
+                className="-ml-4 h-8 hover:bg-transparent uppercase text-[11px] font-semibold text-[#464F60]"
+            >
+                STATUS
+                <SortIcon className="ml-2" sortState={column.getIsSorted()} />
+            </Button>
+        ),
         cell: ({ row }) => {
             const status = row.getValue("status") as string
             const statusStyles: Record<string, string> = {
-                Open: "bg-[#F0F1FA] text-[#4F5AED] hover:bg-[#F0F1FA]",
-                Paid: "bg-[#E1FCEF] text-[#14804A] hover:bg-[#E1FCEF]",
-                Inactive: "bg-[#E9EDF5] text-[#5A6376] hover:bg-[#E9EDF5]",
-                Due: "bg-[#FAF0F3] text-[#D12953] hover:bg-[#FAF0F3]",
+                Open: "bg-[#F0F1FA] text-[#4F5AED]",
+                Paid: "bg-[#E1FCEF] text-[#14804A]",
+                Inactive: "bg-[#E9EDF5] text-[#5A6376]",
+                Due: "bg-[#FAF0F3] text-[#D12953]",
             }
 
             return (
                 <Badge
                     variant="secondary"
-                    className={`font-medium border-0 px-3 py-1 rounded-full ${statusStyles[status] || ""}`}
+                    className={`font-medium border-0 px-3 py-1 rounded-full whitespace-nowrap ${statusStyles[status] || ""}`}
                 >
                     {status}
                 </Badge>
@@ -140,13 +231,9 @@ export const columns: ColumnDef<Customer>[] = [
         header: () => <div className="text-right uppercase text-[11px] font-semibold text-[#464F60]">RATE</div>,
         cell: ({ row }) => {
             const amount = parseFloat(row.getValue("rate"))
-            const formatted = new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "CAD", // Using CAD based on image
-            }).format(amount)
             return (
-                <div className="text-right flex flex-col">
-                    <span className="font-medium text-gray-700">{formatted}</span>
+                <div className="text-right flex flex-col whitespace-nowrap">
+                    <span className="font-medium text-gray-700">{formatCurrency(amount)}</span>
                     <span className="text-[10px] text-gray-400">CAD</span>
                 </div>
             )
@@ -157,18 +244,13 @@ export const columns: ColumnDef<Customer>[] = [
         header: () => <div className="text-right uppercase text-[11px] font-semibold text-[#464F60]">BALANCE</div>,
         cell: ({ row }) => {
             const amount = parseFloat(row.getValue("balance"))
-            const formatted = new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "CAD",
-            }).format(amount)
-            
             const isNegative = amount < 0
             const isPositive = amount > 0
             
             return (
-                <div className="text-right flex flex-col">
+                <div className="text-right flex flex-col whitespace-nowrap">
                     <span className={`font-medium ${isNegative ? 'text-red-500' : isPositive ? 'text-emerald-500' : 'text-gray-700'}`}>
-                        {formatted}
+                        {formatCurrency(amount)}
                     </span>
                     <span className="text-[10px] text-gray-400">CAD</span>
                 </div>
@@ -180,13 +262,9 @@ export const columns: ColumnDef<Customer>[] = [
         header: () => <div className="text-right uppercase text-[11px] font-semibold text-[#464F60]">DEPOSIT</div>,
         cell: ({ row }) => {
             const amount = parseFloat(row.getValue("deposit"))
-            const formatted = new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "CAD",
-            }).format(amount)
             return (
-                <div className="text-right flex flex-col">
-                    <span className="font-medium text-gray-700">{formatted}</span>
+                <div className="text-right flex flex-col whitespace-nowrap">
+                    <span className="font-medium text-gray-700">{formatCurrency(amount)}</span>
                     <span className="text-[10px] text-gray-400">CAD</span>
                 </div>
             )
@@ -194,34 +272,6 @@ export const columns: ColumnDef<Customer>[] = [
     },
     {
         id: "actions",
-        cell: ({ row }) => {
-            return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button 
-                            variant="ghost" 
-                            className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100 transition-opacity"
-                        >
-                            <span className="sr-only">Open menu</span>
-                            <MoreVertical className="h-4 w-4 text-gray-500" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[160px]">
-                        <DropdownMenuItem className="text-blue-600 focus:text-blue-600 cursor-pointer">
-                            <span className="flex-1 font-medium">View</span>
-                            <Info className="ml-2 h-4 w-4" />
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-blue-600 focus:text-blue-600 cursor-pointer">
-                            <span className="flex-1 font-medium">Edit</span>
-                            <Pencil className="ml-2 h-4 w-4" />
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600 focus:text-red-600 cursor-pointer">
-                            <span className="flex-1 font-medium">Delete</span>
-                            <Trash className="ml-2 h-4 w-4" />
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            )
-        },
+        cell: ({ row }) => <ActionsCell row={row} />,
     },
 ]

@@ -4,30 +4,30 @@ import {
     getFilteredRowModel,
     getPaginationRowModel,
     getSortedRowModel,
-    useReactTable,
-    type ColumnFiltersState,
-    type SortingState,
-    type VisibilityState
+    useReactTable
 } from "@tanstack/react-table"
 import {
-    ChevronDown,
     ChevronLeft,
     ChevronRight,
     Filter,
+    Inbox,
     Plus,
     Search,
     Trash
 } from "lucide-react"
-import * as React from "react"
 
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
-    DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { Input } from "@/components/ui/input"
 import {
     TableBody,
@@ -38,21 +38,40 @@ import {
 } from "@/components/ui/table"
 
 // --- Data Type Definition ---
+import { useStore } from "@/store/useUIStore"
+import { CustomerModal } from "./CustomerModal"
 import { columns } from "./columns"
-import data from "./data"
+// import data from "./data"
+import { useCustomers, useDeleteCustomers } from "@/hooks/useCustomers"
+import { Spinner } from "@/components/ui/spinner"
+import { useState } from "react"
+import { DeleteConfirmationDialog } from "./DeleteConfirmationDialog"
 
 
 
-// --- Main Table Component ---
 const DataTable = () => {
-    const [sorting, setSorting] = React.useState<SortingState>([])
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-    const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-    const [rowSelection, setRowSelection] = React.useState({})
-    const [globalFilter, setGlobalFilter] = React.useState("")
+    const {
+        sorting,
+        columnFilters,
+        columnVisibility,
+        rowSelection,
+        globalFilter,
+        setSorting,
+        setColumnFilters,
+        setColumnVisibility,
+        setRowSelection,
+        setGlobalFilter,
+        openAddModal,
+        openEditModal
+    } = useStore()
+
+    const { data: customers } = useCustomers()
+    const { mutateAsync: deleteCustomers, isPending: isDeleting } = useDeleteCustomers()
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
 
     const table = useReactTable({
-        data,
+        data: customers || [],
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -72,6 +91,13 @@ const DataTable = () => {
         },
     })
 
+    const handleDeleteSelected = async () => {
+        const selectedIds = table.getFilteredSelectedRowModel().rows.map(row => row.original.id)
+        await deleteCustomers(selectedIds)
+        setShowDeleteDialog(false)
+        table.resetRowSelection()
+    }
+
     return (
         <div className="w-full p-8 space-y-6 bg-white-50 min-h-screen">
             <div className="bg-white p-7 rounded-xl shadow-sm border relative">
@@ -83,10 +109,11 @@ const DataTable = () => {
                                 <span className="text-sm font-medium text-gray-600">
                                     {table.getFilteredSelectedRowModel().rows.length} selected
                                 </span>
-                                <Button 
-                                    variant="outline" 
-                                    size="icon" 
+                                <Button
+                                    variant="outline"
+                                    size="icon"
                                     className="h-10 w-10 border-gray-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-200 shadow-sm transition-colors"
+                                    onClick={() => setShowDeleteDialog(true)}
                                 >
                                     <Trash className="h-4 w-4" />
                                 </Button>
@@ -95,17 +122,24 @@ const DataTable = () => {
                             <>
                                 {/* Filter Button */}
                                 <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" size="icon" className="h-10 w-10">
-                                            <Filter className="h-4 w-4 text-gray-500" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="outline" size="icon" className="h-10 w-10">
+                                                    <Filter className="h-4 w-4 text-gray-500" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Filter</p>
+                                        </TooltipContent>
+                                    </Tooltip>
                                     <DropdownMenuContent align="start">
                                         <DropdownMenuCheckboxItem
                                             checked={table.getColumn("status")?.getFilterValue() === undefined}
                                             onCheckedChange={() => table.getColumn("status")?.setFilterValue(undefined)}
                                         >
-                                            All Statuses
+                                            All Status
                                         </DropdownMenuCheckboxItem>
                                         <DropdownMenuCheckboxItem
                                             checked={table.getColumn("status")?.getFilterValue() === "Open"}
@@ -143,9 +177,25 @@ const DataTable = () => {
                     </div>
 
                     {/* Add Customer Button */}
-                    <Button className="bg-blue-600 hover:bg-blue-700 text-white font-medium h-10 px-4">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add customer
+                    <Button
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-medium h-10 px-4 w-full md:w-auto"
+                        disabled={table.getFilteredSelectedRowModel().rows.length > 1}
+                        onClick={() => {
+                            if (table.getFilteredSelectedRowModel().rows.length === 1) {
+                                openEditModal(table.getFilteredSelectedRowModel().rows[0].original)
+                            } else {
+                                openAddModal()
+                            }
+                        }}
+                    >
+                        {table.getFilteredSelectedRowModel().rows.length === 1 ? (
+                            "Update customer"
+                        ) : (
+                            <>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add customer
+                            </>
+                        )}
                     </Button>
                 </div>
 
@@ -173,21 +223,14 @@ const DataTable = () => {
                         </TableHeader>
                         <TableBody>
                             {table.getRowModel().rows?.length ? (
-                                table.getRowModel().rows.map((row, index) => (
+                                table.getRowModel().rows.map((row) => (
                                     <TableRow
                                         key={row.id}
                                         data-state={row.getIsSelected() && "selected"}
-                                        className={`
-                                            group
-                                            border-b border-gray-50 
-                                            hover:bg-[#EBF0FA]
-                                            data-[state=selected]:bg-[#F0F6FF] 
-                                            data-[state=selected]:shadow-[inset_4px_0_0_0_#2264E5]
-                                            ${index % 2 === 1 ? 'bg-[#F9FAFC]' : 'bg-white'}
-                                        `}
+                                        className="border-b border-gray-50 hover:bg-[#EBF0FA] transition-colors group"
                                     >
                                         {row.getVisibleCells().map((cell) => (
-                                            <TableCell key={cell.id} className="py-4 align-top">
+                                            <TableCell key={cell.id} className="py-3">
                                                 {flexRender(
                                                     cell.column.columnDef.cell,
                                                     cell.getContext()
@@ -202,7 +245,21 @@ const DataTable = () => {
                                         colSpan={columns.length}
                                         className="h-24 text-center"
                                     >
-                                        No results.
+                                        {customers ? (
+                                            <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+                                                <div className="bg-gray-50 p-4 rounded-full mb-3">
+                                                    <Inbox className="h-8 w-8 text-gray-400" />
+                                                </div>
+                                                <p className="text-base font-medium">No customers found</p>
+                                                <p className="text-sm text-gray-400 mt-1">
+                                                    Add a new customer to get started
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center justify-center h-full">
+                                                <Spinner className="h-6 w-6 text-blue-600" />
+                                            </div>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -211,77 +268,58 @@ const DataTable = () => {
                 </div>
 
                 {/* Pagination */}
-                <div className="sticky bottom-0 z-40 flex items-center justify-between border-t border-gray-100 pt-4 bg-white/40 backdrop-blur-md p-6 -mx-6 -mb-6">
-                    {/* Left: Range Indicator */}
-                    <div className="text-sm text-gray-500 font-medium">
-                        {table.getFilteredRowModel().rows.length > 0 ? (
-                            <>
-                                {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}-
-                                {Math.min(
-                                    (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
-                                    table.getFilteredRowModel().rows.length
-                                )} of {table.getFilteredRowModel().rows.length}
-                            </>
-                        ) : (
-                            "0-0 of 0"
-                        )}
+                <div className="flex items-center justify-end space-x-2 py-4">
+                    <div className="flex-1 text-sm text-muted-foreground">
+                        Rows per page:
+                        <select
+                            value={table.getState().pagination.pageSize}
+                            onChange={e => {
+                                table.setPageSize(Number(e.target.value))
+                            }}
+                            className="mx-2 border rounded p-1"
+                        >
+                            {[10, 20, 30, 40, 50].map(pageSize => (
+                                <option key={pageSize} value={pageSize}>
+                                    {pageSize}
+                                </option>
+                            ))}
+                        </select>
                     </div>
-
-                    {/* Right: Controls */}
-                    <div className="flex items-center gap-6">
-                        {/* Rows per page */}
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-500 font-medium">Rows per page:</span>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-8 text-gray-600 font-medium hover:bg-transparent">
-                                        {table.getState().pagination.pageSize}
-                                        <ChevronDown className="ml-1 h-4 w-4 text-gray-400" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    {[5, 10, 15, 20, 30, 40, 50].map((pageSize) => (
-                                        <DropdownMenuItem
-                                            key={pageSize}
-                                            onClick={() => table.setPageSize(pageSize)}
-                                            className={`${table.getState().pagination.pageSize === pageSize ? "bg-gray-100 font-medium" : ""}`}
-                                        >
-                                            {pageSize}
-                                        </DropdownMenuItem>
-                                    ))}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                    <div className="flex items-center space-x-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => table.previousPage()}
+                            disabled={!table.getCanPreviousPage()}
+                            className="cursor-pointer"
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <div className="text-sm font-medium">
+                            {table.getState().pagination.pageIndex + 1}/{table.getPageCount()}
                         </div>
-
-                        {/* Pagination Buttons */}
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-8 w-8 rounded-lg border-gray-200"
-                                onClick={() => table.previousPage()}
-                                disabled={!table.getCanPreviousPage()}
-                            >
-                                <ChevronLeft className="h-4 w-4 text-gray-500" />
-                            </Button>
-                            
-                            <span className="text-sm text-gray-600 font-medium min-w-[3rem] text-center">
-                                {table.getState().pagination.pageIndex + 1}/{table.getPageCount()}
-                            </span>
-
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-8 w-8 rounded-lg border-gray-200"
-                                onClick={() => table.nextPage()}
-                                disabled={!table.getCanNextPage()}
-                            >
-                                <ChevronRight className="h-4 w-4 text-gray-500" />
-                            </Button>
-                        </div>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => table.nextPage()}
+                            disabled={!table.getCanNextPage()}
+                            className="cursor-pointer"
+                        >
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
                     </div>
                 </div>
             </div>
+            
+            <CustomerModal />
+
+            <DeleteConfirmationDialog 
+                open={showDeleteDialog}
+                onOpenChange={setShowDeleteDialog}
+                onConfirm={handleDeleteSelected}
+                isDeleting={isDeleting}
+                description={`Are you sure you want to delete ${table.getFilteredSelectedRowModel().rows.length} selected item(s)? This action cannot be undone.`}
+            />
         </div>
     )
 }
