@@ -51,11 +51,11 @@ Instead of hardcoding data in components, I created a `customerService.ts` layer
 
 1.  Clone the repository:
     ```bash
-    git clone [https://github.com/yourusername/client-flow.git](https://github.com/yourusername/client-flow.git)
+    git clone https://github.com/bhargavbapatla/Customer-Payment-Dashboard.git
     ```
 2.  Install dependencies:
     ```bash
-    cd client-flow
+    cd payments-dashboard
     npm install
     ```
 3.  Start the development server:
