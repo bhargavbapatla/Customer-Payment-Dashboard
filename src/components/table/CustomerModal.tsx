@@ -192,12 +192,6 @@ export function CustomerModal() {
                                     : "Add Customer"}
                         </DialogTitle>
                     </DialogHeader>
-
-                    {/* Body: Scrollable
-                        1. flex-1: Takes up all remaining space
-                        2. overflow-y-auto: Enables scrolling
-                        3. p-6: Adds padding so inputs don't touch edges
-                    */}
                     <div className="flex-1 overflow-y-auto p-6">
                         <div className="flex flex-col gap-5">
                             {fieldMeta?.map((field) => (
@@ -207,8 +201,6 @@ export function CustomerModal() {
                             ))}
                         </div>
                     </div>
-
-                    {/* Footer: Static at bottom */}
                     <DialogFooter className="p-6 pt-4 border-t border-gray-100 bg-gray-50/50">
                         {isViewMode ? (
                             <Button 

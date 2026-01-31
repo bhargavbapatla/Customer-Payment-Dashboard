@@ -1,3 +1,5 @@
+// mock data for testing
+
 import type { Customer } from "./schema"
 
 const data: Customer[] = [

@@ -43,12 +43,9 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
-
-// --- Data Type Definition ---
 import { useStore } from "@/store/useUIStore"
 import { CustomerModal } from "./CustomerModal"
 import { columns } from "./columns"
-// import data from "./data"
 import { Spinner } from "@/components/ui/spinner"
 import { useCustomers, useDeleteCustomers } from "@/hooks/useCustomers"
 import { useState } from "react"
@@ -207,7 +204,6 @@ const DataTable = () => {
                 </div>
 
                 {/* Table Structure */}
-                {/* <div className="rounded-none border-0 pb-4"> */}
                 <div className="-mx-6">
                     <table className="w-full caption-bottom text-sm">
                         <TableHeader className="sticky top-[89px] z-30 bg-white/40 backdrop-blur-md shadow-sm">

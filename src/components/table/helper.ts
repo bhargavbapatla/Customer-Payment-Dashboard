@@ -52,3 +52,11 @@ export const customerInitialValues = {
     balance: "",
     deposit: "",
 }
+
+export const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "CAD",
+        currencyDisplay: "narrowSymbol",
+    }).format(amount)
+}

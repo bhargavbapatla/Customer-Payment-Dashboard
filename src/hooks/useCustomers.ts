@@ -17,7 +17,6 @@ export const useCreateCustomer = () => {
   return useMutation({
     mutationFn: customerService.add,
     onSuccess: () => {
-      // 1. Invalidate cache to trigger a re-fetch
       queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
       toast.success("Customer added successfully");
     },
@@ -41,7 +40,6 @@ export const useDeleteCustomers = () => {
 
   return useMutation({
     mutationFn: customerService.delete,
-    // Optimistic Update Example (Bonus points for performance)
     onMutate: async (deletedIds) => {
       await queryClient.cancelQueries({ queryKey: customerKeys.lists() });
       const previousCustomers = queryClient.getQueryData(customerKeys.lists());

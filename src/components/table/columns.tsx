@@ -19,8 +19,8 @@ import { useStore } from "@/store/useUIStore"
 import { useDeleteCustomers } from "@/hooks/useCustomers"
 import { useState } from "react"
 import { DeleteConfirmationDialog } from "./DeleteConfirmationDialog"
+import { formatCurrency } from "./helper"
 
-// --- Components ---
 const ActionsCell = ({ row }: { row: any }) => {
     const { openEditModal, openViewModal } = useStore()
     const { mutateAsync: deleteCustomer, isPending: isDeleting } = useDeleteCustomers()
@@ -98,24 +98,16 @@ const SortIcon = ({ className, sortState }: { className?: string; sortState?: fa
 const handleSort = (column: any) => {
     const currentSort = column.getIsSorted()
     if (currentSort === false) {
-        column.toggleSorting(false) // Ascending
+        column.toggleSorting(false)
     } else if (currentSort === "asc") {
-        column.toggleSorting(true) // Descending
+        column.toggleSorting(true)
     } else {
-        column.clearSorting() // Default
+        column.clearSorting()
     }
 }
 
-// --- Helper for Currency ---
-const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "CAD",
-        currencyDisplay: "narrowSymbol",
-    }).format(amount)
-}
 
-// --- Columns Definition ---
+
 export const columns: ColumnDef<Customer>[] = [
     {
         id: "select",
@@ -174,7 +166,6 @@ export const columns: ColumnDef<Customer>[] = [
             </Button>
         ),
         cell: ({ row }) => (
-            // UPDATE: Removed 'truncate', added 'whitespace-normal' and 'break-words'
             <div className="flex flex-col max-w-[150px]">
                 <span className="font-semibold text-gray-900 whitespace-normal break-words">
                     {row.original.name}
@@ -187,7 +178,6 @@ export const columns: ColumnDef<Customer>[] = [
         accessorKey: "description",
         header: () => <div className="uppercase text-[11px] font-semibold text-[#464F60]">DESCRIPTION</div>,
         cell: ({ row }) => (
-            // UPDATE: Removed 'line-clamp', added 'whitespace-normal' and 'break-words'
             <div 
                 className="text-gray-600 max-w-[250px] whitespace-normal break-words"
             >
