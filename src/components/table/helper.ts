@@ -1,5 +1,5 @@
-import type { Customer, IFieldMeta } from "@/types/customer"
-import * as Yup from "yup"
+import type { IFieldMeta } from "@/types/customer";
+import * as Yup from "yup";
 
 
 export const fieldMeta: IFieldMeta[] = [
@@ -51,4 +51,12 @@ export const customerInitialValues = {
     rate: "",
     balance: "",
     deposit: "",
+}
+
+export const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "CAD",
+        currencyDisplay: "narrowSymbol",
+    }).format(amount)
 }
