@@ -31,6 +31,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
     TableBody,
     TableCell,
@@ -43,14 +44,12 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { useStore } from "@/store/useUIStore"
-import { CustomerModal } from "./CustomerModal"
-import { columns } from "./columns"
-import { Spinner } from "@/components/ui/spinner"
 import { useCustomers, useDeleteCustomers } from "@/hooks/useCustomers"
-import { Skeleton } from "@/components/ui/skeleton"
+import { useStore } from "@/store/useUIStore"
 import { useState } from "react"
+import { CustomerModal } from "./CustomerModal"
 import { DeleteConfirmationDialog } from "./DeleteConfirmationDialog"
+import { columns } from "./columns"
 
 
 
