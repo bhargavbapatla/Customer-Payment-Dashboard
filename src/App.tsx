@@ -1,33 +1,46 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import DataTable from './components/table/page'
+import { Toaster } from "@/components/ui/sonner"
+import { useState, useEffect } from 'react'
+import LandingPage from './components/LandingPage'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [showDashboard, setShowDashboard] = useState(() => {
+    return window.location.hash === '#dashboard'
+  })
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const isDashboard = window.location.hash === '#dashboard'
+      setShowDashboard(isDashboard)
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  useEffect(() => {
+    if (showDashboard) {
+      if (window.location.hash !== '#dashboard') {
+        window.history.pushState({ view: 'dashboard' }, '', '#dashboard')
+      }
+    } else {
+      if (window.location.hash === '#dashboard') {
+        window.history.pushState(null, '', window.location.pathname)
+      }
+    }
+  }, [showDashboard])
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      {showDashboard ? (
+        <div className="card space-y-4 animate-in fade-in duration-500">
+          <DataTable />
+        </div>
+      ) : (
+        <LandingPage onEnter={() => setShowDashboard(true)} />
+      )}
+      <Toaster position="top-right" />
     </>
   )
 }
