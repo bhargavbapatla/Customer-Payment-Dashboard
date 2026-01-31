@@ -48,6 +48,7 @@ import { CustomerModal } from "./CustomerModal"
 import { columns } from "./columns"
 import { Spinner } from "@/components/ui/spinner"
 import { useCustomers, useDeleteCustomers } from "@/hooks/useCustomers"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useState } from "react"
 import { DeleteConfirmationDialog } from "./DeleteConfirmationDialog"
 
@@ -69,7 +70,7 @@ const DataTable = () => {
         openEditModal
     } = useStore()
 
-    const { data: customers } = useCustomers()
+    const { data: customers, isLoading } = useCustomers()
     const { mutateAsync: deleteCustomers, isPending: isDeleting } = useDeleteCustomers()
     const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
@@ -225,7 +226,17 @@ const DataTable = () => {
                             ))}
                         </TableHeader>
                         <TableBody>
-                            {table.getRowModel().rows?.length ? (
+                            {isLoading ? (
+                                Array.from({ length: 5 }).map((_, index) => (
+                                    <TableRow key={index} className="hover:bg-transparent">
+                                        {columns.map((_, colIndex) => (
+                                            <TableCell key={colIndex}>
+                                                <Skeleton className="h-6 w-full" />
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row) => (
                                     <TableRow
                                         key={row.id}
@@ -248,21 +259,15 @@ const DataTable = () => {
                                         colSpan={columns.length}
                                         className="h-24 text-center"
                                     >
-                                        {customers ? (
-                                            <div className="flex flex-col items-center justify-center py-8 text-gray-500">
-                                                <div className="bg-gray-50 p-4 rounded-full mb-3">
-                                                    <Inbox className="h-8 w-8 text-gray-400" />
-                                                </div>
-                                                <p className="text-base font-medium">No customers found</p>
-                                                <p className="text-sm text-gray-400 mt-1">
-                                                    Add a new customer to get started
-                                                </p>
+                                        <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+                                            <div className="bg-gray-50 p-4 rounded-full mb-3">
+                                                <Inbox className="h-8 w-8 text-gray-400" />
                                             </div>
-                                        ) : (
-                                            <div className="flex items-center justify-center h-full">
-                                                <Spinner className="h-6 w-6 text-blue-600" />
-                                            </div>
-                                        )}
+                                            <p className="text-base font-medium">No customers found</p>
+                                            <p className="text-sm text-gray-400 mt-1">
+                                                Add a new customer to get started
+                                            </p>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             )}
