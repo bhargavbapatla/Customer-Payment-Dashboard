@@ -31,6 +31,10 @@ const ActionsCell = ({ row }: { row: any }) => {
         setShowDeleteDialog(false)
     }
 
+    if (row.getIsSelected()) {
+        return null
+    }
+
     return (
         <>
             <DropdownMenu>
