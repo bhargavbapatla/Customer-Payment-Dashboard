@@ -1,73 +1,78 @@
-# React + TypeScript + Vite
+# CustPay - Customer Payment Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A high-performance, pixel-perfect dashboard for managing customer payments, built with modern React best practices. This project demonstrates clean architecture, efficient state management, and strict TypeScript patterns.
 
-Currently, two official plugins are available:
+**🚀 [View Live Demo](https://customer-payment-dashboard-lilac.vercel.app/)**
+## 🛠 Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+* **Framework:** React 18 (Vite)
+* **Language:** TypeScript
+* **Styling:** Tailwind CSS + Shadcn UI
+* **State Management:**
+    * *Server State:* TanStack Query (React Query)
+    * *Client State:* Zustand
+* **Forms & Validation:** React Hook Form + Zod
+* **Data Table:** TanStack Table (Headless UI)
+* **Icons:** Lucide React
 
-## React Compiler
+## ✨ Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+* **Responsive Data Table:** Sortable columns, custom cell renderers, and responsive layouts that handle long text gracefully.
+* **Smart CRUD Operations:** Add, Update, and Delete customers with optimistic UI updates.
+* **Robust Validation:** Strict Zod schemas ensure data integrity (e.g., preventing negative deposits).
+* **Mock API Layer:** Simulated network latency (800ms) to demonstrate loading states and Skeleton UI.
+* **Status Management:** Visual indicators for payment statuses (Paid, Due, Open, Inactive).
+* **Currency Handling:** Locale-aware formatting for Canadian Dollars (CAD) to match the design (e.g., `$123.00` vs `CA$123.00`).
 
-## Expanding the ESLint configuration
+## 🏗 Architecture & Design Decisions
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+This project follows a **Separation of Concerns** architecture to avoid "God Components" and ensure maintainability.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 1. State Separation
+I strictly separated "Server State" from "Client State" to avoid synchronization bugs:
+* **TanStack Query:** Handles all data fetching, caching, and invalidation. The UI never manually syncs this data to a local store.
+* **Zustand:** Handles purely UI state (Modal visibility, Row selections) that doesn't need to persist to the server.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 2. Component Composition
+* **`DataTable.tsx`:** Acts as a pure presentational wrapper. It doesn't know *what* data it displays, only *how* to display it.
+* **`useTableStore`:** A dedicated Zustand slice that manages table sorting and filtering, keeping the component logic clean.
+* **`CustomerForm.tsx`:** Isolated form logic with its own validation schema, separate from the modal or table.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 3. Mock Service Layer
+Instead of hardcoding data in components, I created a `customerService.ts` layer. This mimics a real REST API with `Promises` and latency, making it trivial to swap out for a real backend (e.g., Axios/Fetch) in the future without refactoring the UI.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🚀 Getting Started
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Prerequisites
+* Node.js (v18 or higher)
+* npm or yarn
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Installation
+
+1.  Clone the repository:
+    ```bash
+    git clone [https://github.com/yourusername/client-flow.git](https://github.com/yourusername/client-flow.git)
+    ```
+2.  Install dependencies:
+    ```bash
+    cd client-flow
+    npm install
+    ```
+3.  Start the development server:
+    ```bash
+    npm run dev
+    ```
+
+## 📂 Project Structure
+
+```text
+src/
+├── api/            # Mock Service Layer (simulates REST API)
+├── components/     
+│   ├── ui/         # Reusable Shadcn components
+│   ├── table/      # DataTable logic (Columns, Pagination, Toolbar)
+│   └── customers/  # Customer-specific forms and modals
+├── hooks/          # Custom React Query hooks (useCustomers, useCreateCustomer)
+├── lib/            # Utilities (cn, currency formatting)
+├── store/          # Zustand stores (UI State, Table State)
+└── types/          # Shared TypeScript interfaces
